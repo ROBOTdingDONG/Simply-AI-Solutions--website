@@ -1,10 +1,12 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { HashRouter as Router, Routes, Route, useNavigate } from 'react-router-dom'
 import PulseWaveBackground from './PulseWaveBackground.jsx'
 import Assessment from './Assessment.jsx'
 import './App.css'
 
 function HomePage() {
+  const navigate = useNavigate()
+  
   return (
     <>
       <PulseWaveBackground />
@@ -29,10 +31,9 @@ function HomePage() {
             <h2 className="section-title">Our Services</h2>
             <div className="services-grid">
               <div className="service-card">
-                <div className="service-icon">📋</div>
-                <h3>AI Integration Assessment</h3>
+                <div className="service-icon">📋</div>                <h3>AI Integration Assessment</h3>
                 <p>Comprehensive evaluation to determine the best AI solutions for your business needs and security requirements</p>
-                <button className="service-btn" onClick={() => window.location.href = '/assessment'}>
+                <button className="service-btn" onClick={() => navigate('/assessment')}>
                   Take Assessment
                 </button>
               </div>

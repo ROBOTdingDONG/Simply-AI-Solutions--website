@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './Assessment.css'
 
 function Assessment() {
+  const navigate = useNavigate()
   const [currentSection, setCurrentSection] = useState(1)
   const [answers, setAnswers] = useState({})
   const [showResults, setShowResults] = useState(false)
@@ -634,8 +636,7 @@ function Assessment() {
             <div className="cta-buttons">
               <button className="btn-primary" onClick={() => window.open('mailto:contact@simplyaisolutions.com?subject=AI Assessment Follow-up - ' + answers.company_name + '&body=Hi! I just completed the AI Integration Assessment and would like to schedule a consultation to discuss implementing AI solutions for ' + answers.company_name + '. My AI Readiness Score was ' + readinessScore + '.')}>
                 Schedule Free Strategy Consultation
-              </button>
-              <button className="btn-secondary" onClick={() => window.location.href = '/'}>
+              </button>              <button className="btn-secondary" onClick={() => navigate('/')}>
                 Back to Home
               </button>
             </div>
