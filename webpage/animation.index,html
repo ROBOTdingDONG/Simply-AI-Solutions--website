@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulse Wave Interactive Background</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #00ff88;
+            font-family: monospace;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .title {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            z-index: 10;
+            color: #00ff88;
+        }
+
+        canvas {
+            display: block;
+            cursor: none;
+        }
+
+        .cursor {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10;
+            transition: transform 0.1s ease;
+            box-shadow: 0 0 10px #00ff88;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">PULSE WAVE</div>
+        <canvas id="canvas"></canvas>
+        <div class="cursor" id="cursor"></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const cursor = document.getElementById('cursor');
+
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Mouse position
+        let mouse = { x: 0, y: 0 };
+
+        // Circle configuration
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const maxRadius = 400;
+        const dotCount = 120;
+        let pulseOffset = 0;
+
+        // Create dots in circular pattern
+        const dots = [];
+        for (let i = 0; i < dotCount; i++) {
+            const angle = (i / dotCount) * Math.PI * 2;
+            const radius = 80 + (i % 5) * 40; // Varying radii for layered effect
+            dots.push({
+                angle: angle,
+                baseRadius: radius,
+                radius: radius,
+                x: 0,
+                y: 0,
+                size: 3 + Math.random() * 3,
+                pulsePhase: Math.random() * Math.PI * 2,
+                interactionTime: 0,
+                isInteracting: false
+            });
+        }
+
+        // Mouse move handler
+        document.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+            
+            // Update cursor position
+            cursor.style.left = (mouse.x - 4) + 'px';
+            cursor.style.top = (mouse.y - 4) + 'px';
+        });
+
+        // Animation loop
+        function animate() {
+            // Clear canvas
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            pulseOffset += 0.02;
+
+            dots.forEach((dot, index) => {
+                // Calculate base position
+                const basePulse = Math.sin(pulseOffset + dot.pulsePhase) * 15;
+                const currentRadius = dot.baseRadius + basePulse;
+                
+                // Calculate initial position
+                let dotX = centerX + Math.cos(dot.angle) * currentRadius;
+                let dotY = centerY + Math.sin(dot.angle) * currentRadius;
+                
+                // Mouse interaction effect - subtle magnetic attraction
+                const dotDistance = Math.sqrt(
+                    Math.pow(mouse.x - dotX, 2) + Math.pow(mouse.y - dotY, 2)
+                );
+                
+                if (dotDistance < 60 && dotDistance > 0) {
+                    const influence = (60 - dotDistance) / 60;
+                    const attractionStrength = influence * 12; // Subtle magnetic effect
+                    
+                    // Mark as interacting and reset timer
+                    if (!dot.isInteracting) {
+                        dot.isInteracting = true;
+                        dot.interactionTime = 180; // 3 seconds at 60fps
+                    }
+                    
+                    // Calculate direction towards mouse
+                    const dx = mouse.x - dotX;
+                    const dy = mouse.y - dotY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // Apply attraction
+                    dotX += (dx / distance) * attractionStrength;
+                    dotY += (dy / distance) * attractionStrength;
+                }
+                
+                // Handle interaction timer
+                if (dot.isInteracting) {
+                    dot.interactionTime--;
+                    if (dot.interactionTime <= 0) {
+                        dot.isInteracting = false;
+                    }
+                }
+                
+                // Update dot position
+                dot.x = dotX;
+                dot.y = dotY;
+                
+                // Calculate opacity based on pulse and proximity
+                const pulseAlpha = 0.4 + Math.sin(pulseOffset * 2 + dot.pulsePhase) * 0.6;
+                const proximityAlpha = dotDistance < 100 ? 
+                    0.7 + (100 - dotDistance) / 100 * 0.3 : 0.7;
+                
+                // Calculate color based on interaction state
+                let dotColor = '#00ff88'; // Default green
+                let shadowColor = '#00ff88';
+                
+                if (dot.isInteracting) {
+                    // Transition from blue to green over 3 seconds
+                    const progress = dot.interactionTime / 180;
+                    if (progress > 0.7) {
+                        // Bright neon blue for first part
+                        dotColor = '#00aaff';
+                        shadowColor = '#00aaff';
+                    } else {
+                        // Fade from blue to green
+                        const fadeProgress = progress / 0.7;
+                        const red = Math.floor(0 * fadeProgress + 0 * (1 - fadeProgress));
+                        const green = Math.floor(170 * fadeProgress + 255 * (1 - fadeProgress));
+                        const blue = Math.floor(255 * fadeProgress + 136 * (1 - fadeProgress));
+                        dotColor = `rgb(${red}, ${green}, ${blue})`;
+                        shadowColor = dotColor;
+                    }
+                }
+                
+                // Draw dot
+                ctx.save();
+                ctx.globalAlpha = pulseAlpha * proximityAlpha;
+                ctx.fillStyle = dotColor;
+                ctx.shadowColor = shadowColor;
+                ctx.shadowBlur = 8;
+                
+                ctx.beginPath();
+                ctx.arc(dot.x, dot.y, dot.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Add connecting lines for nearby dots
+                dots.forEach((otherDot, otherIndex) => {
+                    if (index < otherIndex) {
+                        const distance = Math.sqrt(
+                            Math.pow(dot.x - otherDot.x, 2) + 
+                            Math.pow(dot.y - otherDot.y, 2)
+                        );
+                        
+                        if (distance < 80) {
+                            // Use the same color logic for connecting lines
+                            let lineColor = '#00ff88';
+                            if (dot.isInteracting || otherDot.isInteracting) {
+                                lineColor = dot.isInteracting ? dotColor : 
+                                           (otherDot.isInteracting ? 
+                                            (otherDot.interactionTime > 126 ? '#00aaff' : 
+                                             `rgb(0, ${Math.floor(170 + 85 * (1 - otherDot.interactionTime / 126))}, ${Math.floor(255 - 119 * (1 - otherDot.interactionTime / 126))})`) 
+                                            : '#00ff88');
+                            }
+                            
+                            ctx.globalAlpha = (80 - distance) / 80 * 0.3;
+                            ctx.strokeStyle = lineColor;
+                            ctx.lineWidth = 0.5;
+                            ctx.beginPath();
+                            ctx.moveTo(dot.x, dot.y);
+                            ctx.lineTo(otherDot.x, otherDot.y);
+                            ctx.stroke();
+                        }
+                    }
+                });
+                
+                ctx.restore();
+            });
+
+
+
+            requestAnimationFrame(animate);
+        }
+
+        // Start animation
+        animate();
+
+        // Add some interactive effects
+        canvas.addEventListener('click', (e) => {
+            // Create ripple effect on click
+            const clickX = e.clientX;
+            const clickY = e.clientY;
+            
+            // Add temporary dots that expand outward
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                setTimeout(() => {
+                    dots.push({
+                        angle: Math.atan2(clickY - centerY, clickX - centerX) + angle * 0.2,
+                        baseRadius: Math.sqrt(Math.pow(clickX - centerX, 2) + Math.pow(clickY - centerY, 2)),
+                        radius: 0,
+                        x: clickX,
+                        y: clickY,
+                        size: 3,
+                        pulsePhase: 0,
+                        temporary: true,
+                        life: 100
+                    });
+                }, i * 50);
+            }
+        });
+
+        // Clean up temporary dots
+        setInterval(() => {
+            for (let i = dots.length - 1; i >= 0; i--) {
+                if (dots[i].temporary) {
+                    dots[i].life--;
+                    if (dots[i].life <= 0) {
+                        dots.splice(i, 1);
+                    }
+                }
+            }
+        }, 100);
+    </script>
+</body>
+</html>
