@@ -353,13 +353,13 @@
 
 .results-header h1 {
   font-size: 2.5rem;
-  color: #2c3e50;
+  color: #ffffff;
   margin-bottom: 0.5rem;
 }
 
 .results-header p {
   font-size: 1.1rem;
-  color: #7f8c8d;
+  color: #ffffff;
 }
 
 .recommendations-section {
@@ -369,7 +369,7 @@
 .recommendations-section h3 {
   text-align: center;
   font-size: 1.8rem;
-  color: #2c3e50;
+  color: #ffffff;
   margin-bottom: 1.5rem;
 }
 
@@ -396,7 +396,7 @@
 
 .recommendation-card h4 {
   font-size: 1.2rem;
-  color: #2c3e50;
+  color: #ffffff;
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
@@ -411,7 +411,7 @@
 .recommendation-card li {
   padding: 0.5rem 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  color: #34495e;
+  color: #ffffff;
 }
 
 .recommendation-card li:last-child {
@@ -446,7 +446,7 @@
 
 .value-item span:last-child {
   font-weight: 500;
-  color: #2c3e50;
+  color: #ffffff;
 }
 
 .cta-section {
@@ -460,13 +460,13 @@
 
 .cta-section h3 {
   font-size: 2rem;
-  color: #2c3e50;
+  color: #ffffff;
   margin-bottom: 1rem;
 }
 
 .cta-section p {
   font-size: 1.1rem;
-  color: #34495e;
+  color: #ffffff;
   line-height: 1.6;
   margin-bottom: 2rem;
 }
